@@ -40,13 +40,21 @@ def on_message(client, userdata, message):
         print("cover update")
         if message.payload:
             mime_type = image_mime(message.payload)
-            image_b64_str = base64.b64encode(message.payload).decode("utf-8")
-        else:
-            mime_type = DEFAULT_MIME
-            image_b64_str = ""
-        msg = {"data": image_b64_str, "mimetype": mime_type}
-        print(f"Got {len(image_b64_str)} byes")
-        #SAVED_INFO["cover_art"] = msg
+            image = message.payload
+            print(f"Got {len(image)} byes")
+            on_coverart(image)
+
+
+last_image = None
+
+def on_coverart(image):
+    global last_image
+    if last_image != image:
+        last_image = image
+        # push to display
+    else:
+        print("No change")
+
 
 # Configure MQTT broker connection
 mqttc = mqtt.Client()

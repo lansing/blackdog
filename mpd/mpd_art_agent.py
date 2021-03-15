@@ -13,6 +13,19 @@ def get_client():
 client = get_client()
 
 last_filename = None
+last_image = None
+
+def on_coverart(image):
+    global last_image
+    global last_filename
+    if image != last_image:
+        print(f"fetched {len(image)} bytes")
+        last_filename = filename
+        last_image = image
+        # push to display
+    else:
+        print("No change")
+
 
 while True:
     try:
@@ -21,11 +34,12 @@ while True:
             song = client.currentsong()
             if 'file' in song:
                 filename = song['file']
-                if filename is not last_filename:
+                if filename != last_filename:
                     url = f"http://{MOODE_HOST}/coverart.php/{filename}"
                     print(url)
                     image = open(url, 'rb').read()
-                    print(f"fetched {len(image)} bytes")
+                    on_coverart(image)
+
     except ConnectionError as e:
         client = get_client
     # TODO catch smart_open errors
