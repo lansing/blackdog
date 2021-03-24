@@ -40,7 +40,7 @@ while True:
                     image = open(url, 'rb').read()
                     on_coverart(image)
 
-    except ConnectionError as e:
+    except (ConnectionError, ConnectionResetError) as e:
         client = get_client
     # TODO catch smart_open errors
 
