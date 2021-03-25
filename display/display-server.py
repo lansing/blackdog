@@ -6,7 +6,7 @@ from PIL import Image
 from inky.inky_uc8159 import Inky
 
 inky = Inky()
-saturation = 0.5
+saturation = 0.7
 
 app = Flask(__name__)
 
