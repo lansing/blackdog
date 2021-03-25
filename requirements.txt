@@ -1,3 +1,6 @@
 python-mpd2
 smart_open[http]
 paho-mqtt
+inky[rpi,fonts]
+pillow
+flask
