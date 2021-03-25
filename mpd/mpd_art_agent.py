@@ -1,8 +1,12 @@
+import requests
+import io
+
 from mpd import MPDClient
 from mpd.base import ConnectionError
 from smart_open import open
 
 MOODE_HOST = "hifi.local"
+DISPLAY_HOST = "hifi.local"
 
 def get_client():
     client = MPDClient()
@@ -22,7 +26,10 @@ def on_coverart(image):
         print(f"fetched {len(image)} bytes")
         last_filename = filename
         last_image = image
-        # push to display
+        image_io = io.BytesIO(image)
+        print("Posting to display server")
+        requests.post(f"http://{MOODE_HOST}:8888/imagez",
+                      files = {"image": image_io})
     else:
         print("No change")
 
@@ -35,7 +42,7 @@ while True:
             if 'file' in song:
                 filename = song['file']
                 if filename != last_filename:
-                    url = f"http://{MOODE_HOST}/coverart.php/{filename}"
+                    url = f"http://{DISPLAY_HOST}/coverart.php/{filename}"
                     print(url)
                     image = open(url, 'rb').read()
                     on_coverart(image)

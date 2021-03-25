@@ -1,7 +1,10 @@
 import base64
+import io
+import requests
 
 import paho.mqtt.client as mqtt
 
+DISPLAY_HOST = "hifi.local"
 MQTT_HOST = "hifi.local"
 MQTT_PORT = 1883
 MQTT_TOPIC = "shairport-sync/hifi"
@@ -51,7 +54,10 @@ def on_coverart(image):
     global last_image
     if last_image != image:
         last_image = image
-        # push to display
+        image_io = io.BytesIO(image)
+        print("Posting to display server")
+        requests.post(f"http://{DISPLAY_HOST}:8888/imagez",
+                      files = {"image": image_io})
     else:
         print("No change")
 
