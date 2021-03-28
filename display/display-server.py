@@ -5,6 +5,7 @@ from flask import request
 from PIL import Image
 from inky.inky_uc8159 import Inky
 from colorthief import ColorThief
+from colorthief import MMCQ
 
 
 inky = Inky()
@@ -15,6 +16,30 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     return 'Display Server'
+
+def get_color_edges(image):
+    width = image.size[0]
+    height = image.size[1]
+
+    width_limit = int(width * 0.1)
+    height_limit = int(height * 0.1)
+
+    top = image.crop((0, 0, width, height_limit))
+    left = image.crop((0,0, width_limit, height))
+    right = image.crop((width - width_limit, 0, width, height))
+    bottom = image.crop((0, height - height_limit, width, height))
+
+    regions = (top, left, right, bottom)
+    valid_pixels = []
+    for region in regions:
+        pixels = region.getdata()
+        valid_pixels.extend(pixels)
+    cmap = MMCQ.quantize(valid_pixels, 5)
+
+    return cmap.palette[0]
+
+    
+
 
 @app.route('/imagez', methods=['POST'])
 def image():
@@ -36,18 +61,12 @@ def image():
 
     fit_image = image.resize((int(new_width), int(new_height)))
 
-    fit_image_bytes = io.BytesIO()
-    fit_image.save(fit_image_bytes, format='PNG')
-    color_thief = ColorThief(fit_image_bytes)
-    dominant_color = color_thief.get_color(quality=1)
+    bg_color = get_color_edges(fit_image)
     
     left = (600 - fit_image.size[0]) // 2
 
-    final_image = Image.new(image.mode, (600, 448), dominant_color)
+    final_image = Image.new(image.mode, (600, 448), bg_color)
     final_image.paste(fit_image, (int(left), 0))
-
-    #return(f"{final_image.size[0]} {final_image.size[1]}")
-
 
     inky.set_image(final_image, saturation=saturation)
     inky.show()
