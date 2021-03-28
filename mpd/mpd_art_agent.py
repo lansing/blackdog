@@ -1,5 +1,6 @@
 import requests
 import io
+import time
 
 from mpd import MPDClient
 from mpd.base import ConnectionError
@@ -14,7 +15,8 @@ def get_client():
     print(f"Connected to {MOODE_HOST} running mpd {client.mpd_version}")
     return client
 
-client = get_client()
+
+client = None
 
 last_filename = None
 last_image = None
@@ -36,6 +38,8 @@ def on_coverart(image):
 
 while True:
     try:
+        if not client:
+          client = get_client()
         events = client.idle()
         if 'player' in events:
             song = client.currentsong()
@@ -47,7 +51,8 @@ while True:
                     image = open(url, 'rb').read()
                     on_coverart(image)
 
-    except (ConnectionError, ConnectionResetError) as e:
-        client = get_client
-    # TODO catch smart_open errors
+    except (ConnectionError, ConnectionResetError, ConnectionRefusedError) as e:
+        print(e)
+        time.sleep(5)
+        client = get_client()
 

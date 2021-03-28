@@ -1,6 +1,7 @@
 import base64
 import io
 import requests
+import time
 
 import paho.mqtt.client as mqtt
 
@@ -69,10 +70,15 @@ mqttc = mqtt.Client()
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 
-print("Connecting to broker", MQTT_HOST, "port", MQTT_PORT)
-mqttc.connect(MQTT_HOST, port=MQTT_PORT)
+while True:
+    try:
+        print("Connecting to broker", MQTT_HOST, "port", MQTT_PORT)
+        mqttc.connect(MQTT_HOST, port=MQTT_PORT)
 
-# loop_start run a thread in the background
-mqttc.loop_start()
+        # loop_start run a thread in the background
+        mqttc.loop_forever()
 
-input()
+    except ConnectionRefusedError as e:
+        print(e)
+        time.sleep(5)
+
