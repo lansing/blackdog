@@ -9,7 +9,7 @@ from colorthief import MMCQ
 
 
 inky = Inky()
-saturation = 0.7
+saturation = 0.8
 
 app = Flask(__name__)
 
@@ -21,8 +21,8 @@ def get_color_edges(image):
     width = image.size[0]
     height = image.size[1]
 
-    width_limit = int(width * 0.1)
-    height_limit = int(height * 0.1)
+    width_limit = int(width * 0.05)
+    height_limit = int(height * 0.05)
 
     top = image.crop((0, 0, width, height_limit))
     left = image.crop((0,0, width_limit, height))
@@ -64,9 +64,10 @@ def image():
     bg_color = get_color_edges(fit_image)
     
     left = (600 - fit_image.size[0]) // 2
+    top = (448 - fit_image.size[1]) // 2
 
     final_image = Image.new(image.mode, (600, 448), bg_color)
-    final_image.paste(fit_image, (int(left), 0))
+    final_image.paste(fit_image, (int(left), int(top)))
 
     inky.set_image(final_image, saturation=saturation)
     inky.show()
