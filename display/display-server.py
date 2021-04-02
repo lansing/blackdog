@@ -36,14 +36,14 @@ class ScreenSaverThread(Thread):
 
 class ScreenSaver():
     def __init__(self):
-        self.stopFlag = Event()
+        self.stop_flag = Event()
 
     def start(self):
-        ScreenSaverThread(self.stopFlag).start()
+        ScreenSaverThread(self.stop_flag).start()
 
     def reset(self):
-        self.stopFlag.set()
-        self.stopFlag = Event()
+        self.stop_flag.set()
+        self.stop_flag = Event()
         self.start()
 
 
@@ -124,17 +124,17 @@ def display_image(image):
     inky.show()
 
 
-screenSaver = None
+screen_saver = None
 
 @app.route('/imagez', methods=['POST'])
 def image():
-    global screenSaver
+    global screen_saver
 
-    if not screenSaver:
-        screenSaver = ScreenSaver()
-        screenSaver.start()
+    if not screen_saver:
+        screen_saver = ScreenSaver()
+        screen_saver.start()
     else:
-        screenSaver.reset()
+        screen_saver.reset()
     
     f = request.files['image']
     image_data = f.read()
@@ -142,8 +142,13 @@ def image():
 
     display_image(image)
 
-    return "Done"
+    return "displayed"
 
+@app.route('/start_screen_saver', methods=['POST'])
+def start_screen_saver():
+    display_random_image()
+    return "displayed"
+    
 
 def display_random_image():
     image = get_random_image()
