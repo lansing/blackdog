@@ -2,6 +2,7 @@ import io
 import glob
 import os
 import random
+from threading import Event, Thread
 
 from flask import Flask
 from flask import request
@@ -11,11 +12,40 @@ from colorthief import ColorThief
 from colorthief import MMCQ
 
 
+SCREEN_SAVER_WAIT = 60*60*4
+SCREEN_SAVER_REFRESH = 60*60
+
 IMAGES_PARENT = os.environ.get('IMAGES_DIR', '/mnt/SDCARD/Images')
 
 
 inky = Inky()
 saturation = 0.8
+
+
+
+class ScreenSaverThread(Thread):
+    def __init__(self, event):
+        Thread.__init__(self)
+        self.stopped = event
+    
+    def run(self):
+        wait = SCREEN_SAVER_WAIT
+        while not self.stopped.wait(wait):
+            display_random_image()
+            wait = SCREEN_SAVER_REFRESH
+
+class ScreenSaver():
+    def __init__(self):
+        self.stopFlag = Event()
+
+    def start(self):
+        ScreenSaverThread(self.stopFlag).start()
+
+    def reset(self):
+        self.stopFlag.set()
+        self.stopFlag = Event()
+        self.start()
+
 
 app = Flask(__name__)
 
@@ -33,12 +63,12 @@ def refill_image_queue():
     current = subdirs[-1]
     image_queue = glob.glob(f"{current}/*")
 
+
 def get_random_image():
     if len(image_queue) == 0:
         refill_image_queue()
     i = random.randint(0, len(image_queue)-1)
     image_path = image_queue.pop(i)
-    print(f"\n\n got {len(image_queue)} left\n")
     f = open(image_path, 'rb')
     image_data = f.read()
     image = Image.open(io.BytesIO(image_data))
@@ -94,16 +124,23 @@ def display_image(image):
     inky.show()
 
 
+screenSaver = None
 
 @app.route('/imagez', methods=['POST'])
 def image():
+    global screenSaver
+
+    if not screenSaver:
+        screenSaver = ScreenSaver()
+        screenSaver.start()
+    else:
+        screenSaver.reset()
+    
     f = request.files['image']
     image_data = f.read()
     image = Image.open(io.BytesIO(image_data))
 
-    #display_image(image)
-
-    display_random_image()
+    display_image(image)
 
     return "Done"
 
@@ -111,5 +148,6 @@ def image():
 def display_random_image():
     image = get_random_image()
     display_image(image)
+
 
 
