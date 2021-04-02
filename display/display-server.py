@@ -24,9 +24,10 @@ def home():
     return 'Display Server'
 
 
-global image_queue = []
+image_queue = []
 
 def refill_image_queue():
+    global image_queue
     subdirs = glob.glob(f"{IMAGES_PARENT}/*")
     subdirs.sort()
     current = subdirs[-1]
@@ -35,9 +36,10 @@ def refill_image_queue():
 def get_random_image():
     if len(image_queue) == 0:
         refill_image_queue()
-    i = random.randint(0, len(image_queue))
-    image_path = image_queue[i]
-    f = open(image_path)
+    i = random.randint(0, len(image_queue)-1)
+    image_path = image_queue.pop(i)
+    print(f"\n\n got {len(image_queue)} left\n")
+    f = open(image_path, 'rb')
     image_data = f.read()
     image = Image.open(io.BytesIO(image_data))
     return image
@@ -65,7 +67,7 @@ def get_color_edges(image):
     return cmap.palette[0]
 
 
-def display_image():
+def display_image(image):
     display_ratio = 600 / 448
     image_ratio = image.size[0] / image.size[1]
 
