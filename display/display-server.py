@@ -126,13 +126,19 @@ def draw_gradient_bg(size, colors):
     image = Image.new('RGB', size)
     w = size[0]
     h = size[1]
+    w_hs = []
+    color = [0, 0, 0]
+    for y in range(h):
+        w_h = ((h-y) / h)
+        w_hs.append(w_h)
     for x in range(w):
+        w_l = ((w - x) / w)
         for y in range(h):
-            weight_tl = ((w - x) / w) * ((h-y) / h)
-            weight_tr = (x / w) * ((h-y) / h)
-            weight_br = (x / w) * (y / h)
-            weight_bl = ((w - x) / w) * (y / h)
-            color = [0, 0, 0]
+            w_h = w_hs[y]
+            weight_tl = w_l * w_h
+            weight_tr = (1-w_l) * w_h
+            weight_br = (1-w_l) * (1-w_h)
+            weight_bl = w_l * (1-w_h)
             for c in range(3):
                 c_tl = colors[0][c] * weight_tl
                 c_tr = colors[1][c] * weight_tr
@@ -140,17 +146,16 @@ def draw_gradient_bg(size, colors):
                 c_bl = colors[3][c] * weight_bl
                 ch = c_tl + c_tr + c_br + c_bl
                 color[c] = min(int(ch), 254)
-                # print(f"{ch} {color[c]}")
             image.putpixel((x,y), tuple(color))
-            # print(f"{x},{y}: {color}")
     return image
 
 
+# For debug only
+# in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
+# cor = get_colors_corners(in_image)
 # image = draw_gradient_bg((600,448), cor)
 # image.save("/Users/max/Desktop/image.png")
 
-# in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
-# cor = get_colors_corners(in_image)
 
 def display_image(image):
     display_ratio = WIDTH / HEIGHT
@@ -167,12 +172,9 @@ def display_image(image):
 
     fit_image = image.resize((int(new_width), int(new_height)))
 
-    # bg_color = get_color_edges(fit_image)
-
     left = (WIDTH - fit_image.size[0]) // 2
     top = (HEIGHT - fit_image.size[1]) // 2
 
-    # final_image = Image.new(image.mode, (600, 448), bg_color)
     corner_colors = get_colors_corners(fit_image)
 
     final_image = draw_gradient_bg((WIDTH, HEIGHT), corner_colors)
