@@ -12,14 +12,14 @@ from colorthief import ColorThief
 from colorthief import MMCQ
 
 
-SCREEN_SAVER_WAIT = 60*60*4
+SCREEN_SAVER_WAIT = 60*60*2
 SCREEN_SAVER_REFRESH = 60*60
 
 IMAGES_PARENT = os.environ.get('IMAGES_DIR', '/mnt/SDCARD/Images')
 
 
 inky = Inky()
-saturation = 0.8
+saturation = 0.7
 
 
 
@@ -126,8 +126,7 @@ def display_image(image):
 
 screen_saver = None
 
-@app.route('/imagez', methods=['POST'])
-def image():
+def reset_screen_saver():
     global screen_saver
 
     if not screen_saver:
@@ -135,6 +134,11 @@ def image():
         screen_saver.start()
     else:
         screen_saver.reset()
+
+
+@app.route('/imagez', methods=['POST'])
+def image():
+    reset_screen_saver()
     
     f = request.files['image']
     image_data = f.read()
@@ -146,6 +150,7 @@ def image():
 
 @app.route('/start_screen_saver', methods=['POST'])
 def start_screen_saver():
+    reset_screen_saver()
     display_random_image()
     return "displayed"
     
