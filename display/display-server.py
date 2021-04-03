@@ -21,6 +21,8 @@ IMAGES_PARENT = os.environ.get('IMAGES_DIR', '/mnt/SDCARD/Images')
 inky = Inky()
 saturation = 0.7
 
+WIDTH = 600
+HEIGHT = 448
 
 
 class ScreenSaverThread(Thread):
@@ -96,28 +98,84 @@ def get_color_edges(image):
 
     return cmap.palette[0]
 
+def get_corners(image_size):
+    limit = 0.1
+    width = image_size[0]
+    height = image_size[1]
+    width_limit = int(width * limit)
+    height_limit = int(height * limit)
+    topleft = (0, 0, width_limit, height_limit)
+    topright = (width-width_limit,0, width, height_limit)
+    bottomright = (width - width_limit, height-height_limit, width, height)
+    bottomleft = (0, height - height_limit, width_limit, height)
+    return (topleft, topright, bottomright, bottomleft)
+
+
+def get_colors_corners(image):
+    corners = get_corners(image.size)
+    corner_colors = []
+    for corner in corners:
+        region = image.crop(corner)
+        pixels = region.getdata()
+        cmap = MMCQ.quantize(pixels, 5)
+        color = cmap.palette[0]
+        corner_colors.append(color)
+    return corner_colors
+
+def draw_gradient_bg(size, colors):
+    image = Image.new('RGB', size)
+    w = size[0]
+    h = size[1]
+    for x in range(w):
+        for y in range(h):
+            weight_tl = ((w - x) / w) * ((h-y) / h)
+            weight_tr = (x / w) * ((h-y) / h)
+            weight_br = (x / w) * (y / h)
+            weight_bl = ((w - x) / w) * (y / h)
+            color = [0, 0, 0]
+            for c in range(3):
+                c_tl = colors[0][c] * weight_tl
+                c_tr = colors[1][c] * weight_tr
+                c_br = colors[2][c] * weight_br
+                c_bl = colors[3][c] * weight_bl
+                ch = c_tl + c_tr + c_br + c_bl
+                color[c] = min(int(ch), 254)
+                # print(f"{ch} {color[c]}")
+            image.putpixel((x,y), tuple(color))
+            # print(f"{x},{y}: {color}")
+    return image
+
+
+# image = draw_gradient_bg((600,448), cor)
+# image.save("/Users/max/Desktop/image.png")
+
+# in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
+# cor = get_colors_corners(in_image)
 
 def display_image(image):
-    display_ratio = 600 / 448
+    display_ratio = WIDTH / HEIGHT
     image_ratio = image.size[0] / image.size[1]
 
     if image_ratio > display_ratio:
       # fit to width
-      new_width = 600
+      new_width = WIDTH
       new_height = new_width // image_ratio
     else:
       # fit to height
-      new_height = 448
+      new_height = HEIGHT
       new_width = new_height * image_ratio
 
     fit_image = image.resize((int(new_width), int(new_height)))
 
-    bg_color = get_color_edges(fit_image)
+    # bg_color = get_color_edges(fit_image)
 
-    left = (600 - fit_image.size[0]) // 2
-    top = (448 - fit_image.size[1]) // 2
+    # left = (600 - fit_image.size[0]) // 2
+    # top = (448 - fit_image.size[1]) // 2
 
-    final_image = Image.new(image.mode, (600, 448), bg_color)
+    # final_image = Image.new(image.mode, (600, 448), bg_color)
+    corner_colors = get_colors_corners(fit_image)
+
+    final_image = draw_gradient_bg((WIDTH, HEIGHT), corner_colors)
     final_image.paste(fit_image, (int(left), int(top)))
 
     inky.set_image(final_image, saturation=saturation)
