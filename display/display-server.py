@@ -169,8 +169,8 @@ def display_image(image):
 
     # bg_color = get_color_edges(fit_image)
 
-    # left = (600 - fit_image.size[0]) // 2
-    # top = (448 - fit_image.size[1]) // 2
+    left = (WIDTH - fit_image.size[0]) // 2
+    top = (HEIGHT - fit_image.size[1]) // 2
 
     # final_image = Image.new(image.mode, (600, 448), bg_color)
     corner_colors = get_colors_corners(fit_image)
