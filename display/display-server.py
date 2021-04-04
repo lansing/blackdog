@@ -25,6 +25,7 @@ saturation = 0.7
 
 WIDTH = 600
 HEIGHT = 448
+CORNER_LIMIT = 0.2
 
 
 class ScreenSaverThread(Thread):
@@ -101,7 +102,7 @@ def get_color_edges(image):
     return cmap.palette[0]
 
 def get_corners(image_size):
-    limit = 0.2
+    limit = CORNER_LIMIT
     width = image_size[0]
     height = image_size[1]
     width_limit = int(width * limit)
