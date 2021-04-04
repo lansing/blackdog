@@ -99,7 +99,7 @@ def get_color_edges(image):
     return cmap.palette[0]
 
 def get_corners(image_size):
-    limit = 0.1
+    limit = 0.2
     width = image_size[0]
     height = image_size[1]
     width_limit = int(width * limit)
@@ -121,6 +121,30 @@ def get_colors_corners(image):
         color = cmap.palette[0]
         corner_colors.append(color)
     return corner_colors
+
+
+def draw_gradient_bg_np(size, colors):
+    w = size[0]
+    h = size[1]
+    pix_indices = np.indices((w,h)).T
+    p_weights = pix_indices[:] / [w-1, h-1]
+    p_weights_c = np.repeat(p_weights, 3).reshape((h,w,2,3))
+    tl_weights_c = ((1,),(1,)) - p_weights_c
+    tr_weights_c = p_weights_c * ((1,),(-1,)) + ((0,),(1,))
+    br_weights_c = p_weights_c
+    bl_weights_c = (p_weights_c - ((1,),(0,))) * ((-1,),(1,))
+    tl_weights_c = tl_weights_c[:,:,0] * tl_weights_c[:,:,1]
+    tr_weights_c = tr_weights_c[:,:,0] * tr_weights_c[:,:,1]
+    br_weights_c = br_weights_c[:,:,0] * br_weights_c[:,:,1]
+    bl_weights_c = bl_weights_c[:,:,0] * bl_weights_c[:,:,1]
+    tl_img = np.minimum(tl_weights_c * colors[0], 254)
+    tr_img = np.minimum(tr_weights_c * colors[1], 254)
+    br_img = np.minimum(br_weights_c * colors[2], 254)
+    bl_img = np.minimum(bl_weights_c * colors[3], 254)
+    img = tl_img + tr_img + br_img + bl_img
+    img = Image.fromarray(np.uint8(img))
+    return img
+
 
 def draw_gradient_bg(size, colors):
     image = Image.new('RGB', size)
@@ -151,8 +175,8 @@ def draw_gradient_bg(size, colors):
 
 
 # For debug only
-# in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
-# cor = get_colors_corners(in_image)
+in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
+cor = get_colors_corners(in_image)
 # image = draw_gradient_bg((600,448), cor)
 # image.save("/Users/max/Desktop/image.png")
 
@@ -177,7 +201,7 @@ def display_image(image):
 
     corner_colors = get_colors_corners(fit_image)
 
-    final_image = draw_gradient_bg((WIDTH, HEIGHT), corner_colors)
+    final_image = draw_gradient_bg_np((WIDTH, HEIGHT), corner_colors)
     final_image.paste(fit_image, (int(left), int(top)))
 
     inky.set_image(final_image, saturation=saturation)
