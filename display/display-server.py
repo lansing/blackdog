@@ -21,7 +21,7 @@ IMAGES_PARENT = os.environ.get('IMAGES_DIR', '/mnt/SDCARD/Images')
 
 
 inky = Inky()
-saturation = 0.7
+saturation = 0.6
 
 WIDTH = 600
 HEIGHT = 448
@@ -32,7 +32,7 @@ class ScreenSaverThread(Thread):
     def __init__(self, event):
         Thread.__init__(self)
         self.stopped = event
-    
+
     def run(self):
         wait = SCREEN_SAVER_WAIT
         while not self.stopped.wait(wait):
@@ -80,7 +80,7 @@ def get_random_image():
     return image
 
 
-def get_color_edges(image):
+def get_bg_color(image):
     width = image.size[0]
     height = image.size[1]
 
@@ -100,6 +100,7 @@ def get_color_edges(image):
     cmap = MMCQ.quantize(valid_pixels, 5)
 
     return cmap.palette[0]
+
 
 def get_corners(image_size):
     limit = CORNER_LIMIT
@@ -126,55 +127,23 @@ def get_colors_corners(image):
     return corner_colors
 
 
-def draw_gradient_bg_np(size, colors):
+def draw_gradient_bg(size, colors):
+    """colors needs to be [topLeft, topRight, bottomRight, bottomLeft]"""
     w = size[0]
     h = size[1]
     pix_indices = np.indices((w,h)).T
-    p_weights = pix_indices[:] / [w-1, h-1]
-    p_weights_c = np.repeat(p_weights, 3).reshape((h,w,2,3))
-    tl_weights_c = ((1,),(1,)) - p_weights_c
-    tr_weights_c = p_weights_c * ((1,),(-1,)) + ((0,),(1,))
-    br_weights_c = p_weights_c
-    bl_weights_c = (p_weights_c - ((1,),(0,))) * ((-1,),(1,))
-    tl_weights_c = tl_weights_c[:,:,0] * tl_weights_c[:,:,1]
-    tr_weights_c = tr_weights_c[:,:,0] * tr_weights_c[:,:,1]
-    br_weights_c = br_weights_c[:,:,0] * br_weights_c[:,:,1]
-    bl_weights_c = bl_weights_c[:,:,0] * bl_weights_c[:,:,1]
-    tl_img = np.minimum(tl_weights_c * colors[0], 254)
-    tr_img = np.minimum(tr_weights_c * colors[1], 254)
-    br_img = np.minimum(br_weights_c * colors[2], 254)
-    bl_img = np.minimum(bl_weights_c * colors[3], 254)
-    img = tl_img + tr_img + br_img + bl_img
-    img = Image.fromarray(np.uint8(img))
-    return img
-
-
-def draw_gradient_bg(size, colors):
-    image = Image.new('RGB', size)
-    w = size[0]
-    h = size[1]
-    w_hs = []
-    color = [0, 0, 0]
-    for y in range(h):
-        w_h = ((h-y) / h)
-        w_hs.append(w_h)
-    for x in range(w):
-        w_l = ((w - x) / w)
-        for y in range(h):
-            w_h = w_hs[y]
-            weight_tl = w_l * w_h
-            weight_tr = (1-w_l) * w_h
-            weight_br = (1-w_l) * (1-w_h)
-            weight_bl = w_l * (1-w_h)
-            for c in range(3):
-                c_tl = colors[0][c] * weight_tl
-                c_tr = colors[1][c] * weight_tr
-                c_br = colors[2][c] * weight_br
-                c_bl = colors[3][c] * weight_bl
-                ch = c_tl + c_tr + c_br + c_bl
-                color[c] = min(int(ch), 254)
-            image.putpixel((x,y), tuple(color))
-    return image
+    # create mask for top-left color, then mirror it to get additional masks
+    tl_mask = ((w-1,h-1) - pix_indices) / (w-1,h-1)  # top left is 1,1
+    tl_mask_c = np.repeat(tl_mask, 3).reshape((h,w,2,3))  # repeat for 3 channels
+    mirrors = [(0,0), (1,0), (1,1), (0,1)]
+    img = np.zeros((h, w, 3))
+    for i in range(len(mirrors)):
+        mirror_x, mirror_y = mirrors[i]
+        x_mult, y_mult, x_add, y_add = (1-mirror_x*2), (1-mirror_y*2), mirror_x, mirror_y
+        mask_mirrored = tl_mask_c * ((x_mult,),(y_mult,)) + ((x_add,),(y_add,))
+        mask_mirrored_combined = mask_mirrored[:,:,0] * mask_mirrored[:,:,1]
+        img += mask_mirrored_combined * colors[i]
+    return Image.fromarray(np.uint8(img))
 
 
 # For debug only
@@ -204,7 +173,7 @@ def display_image(image):
 
     corner_colors = get_colors_corners(fit_image)
 
-    final_image = draw_gradient_bg_np((WIDTH, HEIGHT), corner_colors)
+    final_image = draw_gradient_bg((WIDTH, HEIGHT), corner_colors)
     final_image.paste(fit_image, (int(left), int(top)))
 
     inky.set_image(final_image, saturation=saturation)
@@ -226,7 +195,7 @@ def reset_screen_saver():
 @app.route('/imagez', methods=['POST'])
 def image():
     reset_screen_saver()
-    
+
     f = request.files['image']
     image_data = f.read()
     image = Image.open(io.BytesIO(image_data))
@@ -240,11 +209,9 @@ def start_screen_saver():
     reset_screen_saver()
     display_random_image()
     return "displayed"
-    
+
 
 def display_random_image():
     image = get_random_image()
     display_image(image)
-
-
 
