@@ -175,8 +175,8 @@ def draw_gradient_bg(size, colors):
 
 
 # For debug only
-in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
-cor = get_colors_corners(in_image)
+# in_image = Image.open(io.BytesIO(open("/Users/max/Desktop/700138.jpg", "rb").read()))
+# cor = get_colors_corners(in_image)
 # image = draw_gradient_bg((600,448), cor)
 # image.save("/Users/max/Desktop/image.png")
 
