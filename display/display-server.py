@@ -4,6 +4,8 @@ import os
 import random
 from threading import Event, Thread
 
+import numpy as np
+
 from flask import Flask
 from flask import request
 from PIL import Image
