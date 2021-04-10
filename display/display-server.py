@@ -153,7 +153,7 @@ def draw_gradient_bg(size, colors):
 # image.save("/Users/max/Desktop/image.png")
 
 
-def display_image(image):
+def display_image(image, gradient=True):
     display_ratio = WIDTH / HEIGHT
     image_ratio = image.size[0] / image.size[1]
 
@@ -171,7 +171,10 @@ def display_image(image):
     left = (WIDTH - fit_image.size[0]) // 2
     top = (HEIGHT - fit_image.size[1]) // 2
 
-    corner_colors = get_colors_corners(fit_image)
+    if gradient:
+            corner_colors = get_colors_corners(fit_image)
+    else:
+            corner_colors = [(255,255,255)]*4
 
     final_image = draw_gradient_bg((WIDTH, HEIGHT), corner_colors)
     final_image.paste(fit_image, (int(left), int(top)))
@@ -213,5 +216,5 @@ def start_screen_saver():
 
 def display_random_image():
     image = get_random_image()
-    display_image(image)
+    display_image(image, gradient=False)
 
