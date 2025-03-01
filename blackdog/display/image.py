@@ -5,6 +5,8 @@ import sys
 from PIL import Image
 from inky.inky_uc8159 import Inky
 
+## Just a test script to validate function of of the display
+
 inky = Inky()
 saturation = 0.5
 

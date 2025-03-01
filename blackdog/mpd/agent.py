@@ -6,15 +6,14 @@ from mpd import MPDClient
 from mpd.base import ConnectionError
 from smart_open import open
 
-MOODE_HOST = "hifi.local"
-DISPLAY_HOST = "hifi.local"
+MOODE_HOST = "localhost"
+DISPLAY_HOST = "localhost"
 
 def get_client():
     client = MPDClient()
     client.connect(MOODE_HOST, 6600)
     print(f"Connected to {MOODE_HOST} running mpd {client.mpd_version}")
     return client
-
 
 client = None
 

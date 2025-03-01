@@ -5,10 +5,10 @@ import time
 
 import paho.mqtt.client as mqtt
 
-DISPLAY_HOST = "hifi.local"
-MQTT_HOST = "hifi.local"
+DISPLAY_HOST = "localhost"
+MQTT_HOST = "localhost"
 MQTT_PORT = 1883
-MQTT_TOPIC = "shairport-sync/hifi"
+MQTT_TOPIC = "shairport"
 
 
 SUBTOPICS = [
@@ -34,7 +34,9 @@ def image_mime(image):
 
 def on_connect(client, userdata, flags, rc):
      for subtopic in SUBTOPICS:
-        (result, msg_id) = client.subscribe(subtopic_full(subtopic), 0)
+        full_topic = subtopic_full(subtopic)
+        print(f"subscribe: {full_topic}")
+        (result, msg_id) = client.subscribe(full_topic, 0)
 
 def on_message(client, userdata, message):
     if message.topic != subtopic_full("cover"):
@@ -57,8 +59,11 @@ def on_coverart(image):
         last_image = image
         image_io = io.BytesIO(image)
         print("Posting to display server")
-        requests.post(f"http://{DISPLAY_HOST}:8888/imagez",
-                      files = {"image": image_io})
+        try:
+            requests.post(f"http://{DISPLAY_HOST}:8888/imagez",
+                        files = {"image": image_io})
+        except Exception as e:
+            print(f"Error: {str(e)}")
     else:
         print("No change")
 

@@ -1,6 +1,7 @@
-python-mpd2
-smart_open[http]
-paho-mqtt
-inky[rpi,fonts]
-pillow
-flask
+python-mpd2==3.1.1
+smart_open[http]==7.1.0
+paho-mqtt==2.1.0
+inky[rpi,fonts]==2.0.0
+pillow==11.1.0
+flask==3.1.0
+colorthief==0.2.1
