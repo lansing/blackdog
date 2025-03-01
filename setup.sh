@@ -73,8 +73,9 @@ delete_service "blackdog-shairport.service"
 
 # Branch based on the flag
 if [ "$dev" = true ]; then
-  echo "Copying files from local dir"
-  cp -r /mnt/SDCARD/blackdog $install_dir
+  echo "Copying files from current dir"
+  parent_dir=$(dirname "$(realpath "$0")")
+  cp -r $parent_dir $install_dir
 else
   echo "Downloading the scripts"
   wget -q $repo_zip -O $tmp_download_file && unzip -q $tmp_download_file "blackdog-master/*" -d $install_dir && rm -f $tmp_download_file && mv $install_dir/blackdog-master/* $install_dir && rm -rf $install_dir/blackdog-master
@@ -86,7 +87,6 @@ python -m venv $venv_dir
 echo "Installing Python dependencies"
 $venv_dir/bin/pip install -r $install_dir/requirements.txt
 
-# TODO confirm that we want to setup Shairport
 echo "Setting up Shairport agent"
 
 echo "Installing Mosquitto"
@@ -95,18 +95,16 @@ sudo apt install -y mosquitto
 echo "Installing blackdog-shairport"
 echo "Modifying shairport.conf (we will back up the original!)"
 sudo python $install_dir/blackdog/shairport/shairport_mqtt_config.py /etc/shairport-sync.conf $install_dir/blackdog/shairport/shairport-mqtt.conf
-# TODO install blackdog-shairport
+
+
 echo "Adding blackdog-shairport systemd"
 sudo cp $install_dir/blackdog/shairport/blackdog-shairport.service /etc/systemd/system/blackdog-shairport.service
 sudo systemctl enable blackdog-shairport.service
 sudo systemctl start blackdog-shairport.service
 
-# TODO confirm that we want mpd support 
 echo "Installing blackdog-mpd"
 
-# TODO confir that we want display-server support
 echo "Installing blackdog-display-server"
-
 
 echo "Enabling i2c and SPI"
 sudo raspi-config nonint do_i2c 0
@@ -121,17 +119,12 @@ sudo cp $install_dir/blackdog/display/blackdog-display.service /etc/systemd/syst
 sudo systemctl enable blackdog-display.service
 sudo systemctl start blackdog-display.service
 
-# TODO confirm that we want to install mpd stuff
 echo "Adding blackdog-mpd systemd"
 
 sudo cp $install_dir/blackdog/mpd/blackdog-mpd.service /etc/systemd/system/blackdog-mpd.service
 sudo systemctl enable blackdog-mpd.service
 sudo systemctl start blackdog-mpd.service
 
-echo "You should restart the system for everthing to work properly"
-
-# echo "\n\n*** READ THIS ***\n\n"
-# echo "If you installed blackdog-display-server, you must enable SPI for the display to work."
-# echo "run sudo raspi-config, select Interface Options, select SPI, choose YES."
+echo "We changed some firmware setting for the Inky so you might need to restart the system."
 
 
