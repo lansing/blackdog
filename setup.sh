@@ -87,6 +87,8 @@ python -m venv $venv_dir
 echo "Installing Python dependencies"
 $venv_dir/bin/pip install -r $install_dir/requirements.txt
 
+
+## BEGIN blackdog-shairport install
 echo "Setting up Shairport agent"
 
 echo "Installing Mosquitto"
@@ -94,16 +96,15 @@ sudo apt install -y mosquitto
 
 echo "Installing blackdog-shairport"
 echo "Modifying shairport.conf (we will back up the original!)"
-sudo python $install_dir/blackdog/shairport/shairport_mqtt_config.py /etc/shairport-sync.conf $install_dir/blackdog/shairport/shairport-mqtt.conf
-
+sudo python $install_dir/setup/shairport_mqtt_config.py /etc/shairport-sync.conf $install_dir/setup/conf/shairport-mqtt.conf
 
 echo "Adding blackdog-shairport systemd"
-sudo cp $install_dir/blackdog/shairport/blackdog-shairport.service /etc/systemd/system/blackdog-shairport.service
+sudo cp $install_dir/systemd/blackdog-shairport.service /etc/systemd/system/blackdog-shairport.service
 sudo systemctl enable blackdog-shairport.service
 sudo systemctl start blackdog-shairport.service
 
-echo "Installing blackdog-mpd"
 
+## BEGIN blackdog-display-server install
 echo "Installing blackdog-display-server"
 
 echo "Enabling i2c and SPI"
@@ -119,12 +120,14 @@ sudo cp $install_dir/blackdog/display/blackdog-display.service /etc/systemd/syst
 sudo systemctl enable blackdog-display.service
 sudo systemctl start blackdog-display.service
 
+## BEGIN blackdog-mpd install
 echo "Adding blackdog-mpd systemd"
 
 sudo cp $install_dir/blackdog/mpd/blackdog-mpd.service /etc/systemd/system/blackdog-mpd.service
 sudo systemctl enable blackdog-mpd.service
 sudo systemctl start blackdog-mpd.service
 
-echo "We changed some firmware setting for the Inky so you might need to restart the system."
+
+echo "All done. We changed some firmware setting to support the Inky display, so you might need to restart the system."
 
 

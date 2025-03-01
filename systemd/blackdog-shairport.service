@@ -1,0 +1,15 @@
+[Unit]
+Description=Blackdog Shairport Agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/blackdog
+ExecStart=/opt/blackdog/venv/bin/python -m blackdog.sources.shairport
+Restart=on-failure
+Environment=VIRTUAL_ENV=/opt/blackdog/venv
+Environment=PATH=$VIRTUAL_ENV/bin:$PATH
+
+[Install]
+WantedBy=multi-user.target
