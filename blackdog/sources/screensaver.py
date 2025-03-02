@@ -71,12 +71,21 @@ class ScreenSaver(Source):
     def _refill_image_queue(self):
         if not self.config.art_dir:
             raise Exception("You must provide an art_dir in the config")
-        log.debug(event="refill", glob=f"{self.config.art_dir}/*")
-        subdirs = glob.glob(f"{self.config.art_dir}/*")
-        print(subdirs)
-        subdirs.sort()
-        current = subdirs[-1]
-        self.image_queue = glob.glob(f"{current}/*")
+        log.debug(event="refill_begin", art_dir=self.config.art_dir)
+        contents = glob.glob(f"{self.config.art_dir}/*")
+        subdirs = list(filter(lambda path: os.path.isdir(path), contents))
+        if subdirs:
+            # only use the last subdir
+            subdirs.sort()
+            current = subdirs[-1]
+            self.image_queue = glob.glob(f"{current}/*")
+            log.debug(event="refill_subdir", art_dir=current, num_images=len(self.image_queue))
+        else:
+            files = list(filter(lambda path: not os.path.isdir(path), contents))
+            self.image_queue = files
+            log.debug(event="refill_parent", art_dir=self.config.art_dir,
+                      num_images=len(self.image_queue))
+
 
     def _get_random_image(self):
         if len(self.image_queue) == 0:

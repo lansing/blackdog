@@ -34,6 +34,9 @@ class Orchestrator:
 
         if capture:
             self.capture_expires = current_time + capture
+            log.debug("orchestrator_display_captured",
+                        current_time=current_time,
+                        capture_expires=self.capture_expires)
         else:
             # this request is non-capturing, so we only proceed if capture has expired
             if current_time < self.capture_expires:
