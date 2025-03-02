@@ -17,14 +17,16 @@ class Source:
         self.display_url = display_url
 
     def display(self, image: bytes, gradient=True, capture=3600):
+        data = {
+            'gradient': gradient,
+            'capture': capture
+        }
         log.debug(event="posting_to_display_server",
                   display_url=self.display_url,
+                  data=data,
+                  image_len=len(image),
                   source=self.__class__.__name__)
         try:
-            data = {
-                'gradient': gradient,
-                'capture': capture
-            }
             response = requests.post(self.display_url,
                                      data=data,
                                      files={"image": io.BytesIO(image)})
