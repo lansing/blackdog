@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/blackdog
-ExecStart=/opt/blackdog/venv/bin/python -m blackdog.sources.screensaver --art_dir /opt/blackdog/images --capture 1 --rotate 60
+ExecStart=/opt/blackdog/venv/bin/python -m blackdog.sources.screensaver --art_dir /opt/blackdog/images --capture 1 --rotate 60 --daily_dir
 Restart=on-failure
 Environment=VIRTUAL_ENV=/opt/blackdog/venv
 Environment=PATH=$VIRTUAL_ENV/bin:$PATH

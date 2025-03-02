@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 from typing import Optional
 import io
 import glob
@@ -8,6 +9,7 @@ import os
 from threading import Event, Thread
 
 from smart_open import open
+import numpy as np
 
 from blackdog.sources import DEFAULT_DISPLAY_SERVER_URL
 from blackdog.sources.abstract import Source
@@ -24,10 +26,15 @@ ROTATE_INTERVAL = 60*60  # change the image
 
 
 class ScreenSaverConfig:
-    def __init__(self, art_dir: str, capture: int=0, rotate: int = ROTATE_INTERVAL):
+    def __init__(self,
+                 art_dir: str,
+                 capture: int=0,
+                 rotate: int = ROTATE_INTERVAL,
+                 daily_dir: bool = False):
         self.art_dir = art_dir
         self.capture = capture
         self.rotate = rotate
+        self.daily_dir = daily_dir
 
 
 class ScreenSaverThread(Thread):
@@ -77,7 +84,13 @@ class ScreenSaver(Source):
         if subdirs:
             # only use the last subdir
             subdirs.sort()
-            current = subdirs[-1]
+            if self.config.daily_dir:
+                yday = datetime.today().timetuple().tm_yday
+                todays_idx = np.random.RandomState(yday).randint(len(subdirs))
+                current = subdirs[todays_idx]
+                log.debug(event="refill_subdir_daily", yday=yday, todays_idx=todays_idx)
+            else:
+                current = subdirs[-1]
             self.image_queue = glob.glob(f"{current}/*")
             log.debug(event="refill_subdir", art_dir=current, num_images=len(self.image_queue))
         else:
@@ -128,6 +141,11 @@ def main():
         type=int, 
         default=ROTATE_INTERVAL, 
         help='Image rotation interval in seconds'
+    )
+    parser.add_argument(
+        '--daily_dir', 
+        action='store_true',
+        help='Rotate to a new subdirectory of art_dir each day'
     )
 
     args = parser.parse_args()
