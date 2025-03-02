@@ -8,7 +8,6 @@ from PIL import Image
 from blackdog.display.orchestrator import Orchestrator
 
 log_level = os.getenv("LOGLEVEL", "INFO").upper()
-# logging.basicConfig(level=log_level)
 structlog.configure(
     wrapper_class=structlog.make_filtering_bound_logger(log_level),
 )

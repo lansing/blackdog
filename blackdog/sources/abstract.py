@@ -36,3 +36,6 @@ class Source:
                           source=self.__class__.__name__)
 
 
+    def run(self):
+        raise NotImplementedError("Implement in subclass")
+

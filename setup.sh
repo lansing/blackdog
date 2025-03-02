@@ -125,6 +125,18 @@ sudo cp $install_dir/systemd/blackdog-mpd.service /etc/systemd/system/blackdog-m
 sudo systemctl enable blackdog-mpd.service
 sudo systemctl start blackdog-mpd.service
 
+## BEGIN blackdog-screensaver
+echo "Adding blackdog-screensaver systemd"
+sudo cp $install_dir/systemd/blackdog-screensaver.service /etc/systemd/system/blackdog-screensaver.service
+sudo systemctl enable blackdog-screensaver.service
+sudo systemctl start blackdog-screensaver.service
+
+
+## BEGIN cleanup and conclusion
+echo "Cleaning up"
+rm -rf $install_dir/systemd
+rm -rf $install_dir/setup
+rm -rf $install_dir/setup.sh
 
 echo "All done. We changed some firmware setting to support the Inky display, so you might need to restart the system."
 
