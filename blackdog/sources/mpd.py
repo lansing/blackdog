@@ -6,6 +6,7 @@ import os
 from smart_open import open
 
 from mpd import MPDClient
+from blackdog.sources import DEFAULT_DISPLAY_SERVER_URL
 from blackdog.sources.abstract import Source
 
 log_level = os.getenv("LOGLEVEL", "INFO").upper()
@@ -66,7 +67,7 @@ def main():
     parser.add_argument(
         '--display_url', 
         type=str, 
-        default="http://localhost:8888/imagez", 
+        default=DEFAULT_DISPLAY_SERVER_URL, 
         help='URL for display server endpoint'
     )
     parser.add_argument(

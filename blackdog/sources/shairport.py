@@ -51,7 +51,8 @@ class Shairport(Source):
             log.debug(event="shairport_mqtt_connected")
             mqttc.loop_forever()
         except ConnectionRefusedError as e:
-            log.exception(event="shairport_mqtt_connect_failed")
+            log.exception(event="shairport_mqtt_connect_failed",
+                          message="could not connect to mqtt, is it running? check your config")
             raise e
 
     def _subtopic_full(self, subtopic: str):
@@ -79,7 +80,7 @@ def main():
     parser.add_argument(
         '--display_url', 
         type=str, 
-        default="http://localhost:8888/imagez", 
+        default="http://localhost:8888/display", 
         help='URL for display server endpoint'
     )
     parser.add_argument(

@@ -16,7 +16,8 @@ fi
 
 dev=false
 
-# Process the command-line arguments using getopts
+# TODO this doesn't seem to work
+# We want to get the flag -d
 while getopts ":d" opt; do
   case $opt in
     f)
@@ -89,12 +90,11 @@ $venv_dir/bin/pip install -r $install_dir/requirements.txt
 
 
 ## BEGIN blackdog-shairport install
-echo "Setting up Shairport agent"
+echo "Installing blackdog-shairport"
 
 echo "Installing Mosquitto"
 sudo apt install -y mosquitto
 
-echo "Installing blackdog-shairport"
 echo "Modifying shairport.conf (we will back up the original!)"
 sudo python $install_dir/setup/shairport_mqtt_config.py /etc/shairport-sync.conf $install_dir/setup/conf/shairport-mqtt.conf
 
@@ -112,17 +112,15 @@ sudo raspi-config nonint do_i2c 0
 sudo raspi-config nonint do_spi 0
 
 echo "Adding dtoverlay=spi0-0cs to firmware config"
-sudo python $install_dir/blackdog/display/fix_firmware_config.py
+sudo python $install_dir/setup/fix_firmware_config.py
 
 echo "Adding blackdog-display systemd"
-
-sudo cp $install_dir/blackdog/display/blackdog-display.service /etc/systemd/system/blackdog-display.service
+sudo cp $install_dir/systemd/blackdog-display.service /etc/systemd/system/blackdog-display.service
 sudo systemctl enable blackdog-display.service
 sudo systemctl start blackdog-display.service
 
 ## BEGIN blackdog-mpd install
 echo "Adding blackdog-mpd systemd"
-
 sudo cp $install_dir/systemd/blackdog-mpd.service /etc/systemd/system/blackdog-mpd.service
 sudo systemctl enable blackdog-mpd.service
 sudo systemctl start blackdog-mpd.service
