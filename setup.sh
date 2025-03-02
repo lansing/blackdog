@@ -70,7 +70,7 @@ echo "Deleting services if they are already installed"
 delete_service "blackdog-display.service"
 delete_service "blackdog-mpd.service"
 delete_service "blackdog-shairport.service"
-
+delete_service "blackdog-screensaver.service"
 
 # Branch based on the flag
 if [ "$dev" = true ]; then
