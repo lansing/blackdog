@@ -9,7 +9,6 @@ from blackdog.sources.abstract import Source
 
 
 log_level = os.getenv("LOGLEVEL", "INFO").upper()
-# logging.basicConfig(level=log_level)
 structlog.configure(
     wrapper_class=structlog.make_filtering_bound_logger(log_level),
 )
