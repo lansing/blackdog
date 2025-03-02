@@ -123,7 +123,7 @@ sudo systemctl start blackdog-display.service
 ## BEGIN blackdog-mpd install
 echo "Adding blackdog-mpd systemd"
 
-sudo cp $install_dir/blackdog/mpd/blackdog-mpd.service /etc/systemd/system/blackdog-mpd.service
+sudo cp $install_dir/systemd/blackdog-mpd.service /etc/systemd/system/blackdog-mpd.service
 sudo systemctl enable blackdog-mpd.service
 sudo systemctl start blackdog-mpd.service
 

@@ -52,6 +52,7 @@ class Shairport(Source):
             mqttc.loop_forever()
         except ConnectionRefusedError as e:
             log.exception(event="shairport_mqtt_connect_failed")
+            raise e
 
     def _subtopic_full(self, subtopic: str):
         topic = "/".join([self.mqtt_config.topic, subtopic])
