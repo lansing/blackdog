@@ -1,10 +1,10 @@
 import argparse
 from paho.mqtt.enums import CallbackAPIVersion
 import structlog
-import logging
 import os
 
 from paho.mqtt.client import Client, MQTTMessage
+from blackdog.sources import DEFAULT_DISPLAY_SERVER_URL
 from blackdog.sources.abstract import Source
 
 
@@ -80,7 +80,7 @@ def main():
     parser.add_argument(
         '--display_url', 
         type=str, 
-        default="http://localhost:8888/display", 
+        default=DEFAULT_DISPLAY_SERVER_URL,
         help='URL for display server endpoint'
     )
     parser.add_argument(
