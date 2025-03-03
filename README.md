@@ -1,6 +1,6 @@
 # BlackDog
 ![BlackDog Display on DAC](setup/blackdog-on-dac.jpeg)
----
+
 E Ink Album Art Display for Raspberry Pi
 
 Turn your RaspPi audio source, plus Inky Expression 7-color E Ink display, into a beautiful album art display for your hifi system.

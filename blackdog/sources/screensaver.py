@@ -1,7 +1,6 @@
 import argparse
 from datetime import datetime
 from typing import Optional
-import io
 import glob
 import random
 import structlog
@@ -99,14 +98,13 @@ class ScreenSaver(Source):
             log.debug(event="refill_parent", art_dir=self.config.art_dir,
                       num_images=len(self.image_queue))
 
-
     def _get_random_image(self):
         if len(self.image_queue) == 0:
             self._refill_image_queue()
         i = random.randint(0, len(self.image_queue)-1)
         image_path = self.image_queue.pop(i)
-        image_data = open(image_path, 'rb').read()
-        return image_data
+        with open(image_path, 'rb') as file:
+            return file.read()
 
     def _refresh(self):
         log.debug(event="screen_saver_refresh")
@@ -133,7 +131,7 @@ def main():
     parser.add_argument(
         '--capture', 
         type=int, 
-        default=int, 
+        default=0, 
         help='Interval in seconds with which to capture display (for testing perhaps)'
     )
     parser.add_argument(
