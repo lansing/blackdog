@@ -1,31 +1,27 @@
-# Black Dog - E Ink Album Art Display
+# BlackDog
+![BlackDog Display on DAC](setup/blackdog-on-dac.jpeg)
+---
+E Ink Album Art Display for Raspberry Pi
 
-## Overview 
+Turn your RaspPi audio source, plus Inky Expression 7-color E Ink display, into a beautiful album art display for your hifi system.
 
-Black Dog turns your Raspberry Pi audio source, plus Inky Expression 7-color E Ink display, into a beautiful
-album art display for your hifi system.
+Display your own images while the stereo is not being used.
 
-Black Dog has been developed against the Moode Audio system as a target, but it should work with any
-Raspberry Pi being used as an audio source. It currently supports two renderers: Shairport Sync, for AirPlay
-support, and Music Player Daemon. 
+## Features
 
-Agents have been implemented for each renderer. The agents list for album art update
-change events, and post the new album art image to a shared display server. 
-
-It should be possible to add support for any other audio renderer that
-provides album art metadata in some way, or implement agents that consume other image data sources.
-
-One such alternative agent has been implemented, a screen saver module. When music isn't playing,
-the screen saver rotates through a curated selection of images.
-
+- **Shairport Sync (Airplay)** support
+- **MPD (Music Player Daemon)** support
+- **Screen Saver** module
+- **Gradient borders** when the album art does not fill the display
+- Centered on Moode Audio but not dependent on it
+- Modular implementation, easy to add support for any other audio rendere that provides album art metadata
+- Minimal CPU/power utilization due to event-driven design
 
 ## Hardware Requirements
 
-- Raspberry Pi of some sort (I'm using a 4), plus normal accessories (power adapter, SD card, etc)
+- Raspberry Pi
 - Inky Expression 7-color E Ink display
-- DAC compatible with Moode audio: USB, I2C, HDMI out... many possibilities
-- BYO stereo, of course
-
+- BYO DAC, amp and speakers, of course
 
 ## Install
 
@@ -40,3 +36,32 @@ sudo curl -L https://raw.githubusercontent.com/lansing/blackdog/refs/heads/maste
 - Make sure your Inky Expression is plugged in to your GPIO pins
 
 - Play some tunes and enjoy the album art
+
+## More details
+
+
+### BlackDog components
+
+- **Display Server** provides an HTTP endpoint. Images posted here will be processed
+(which includes adding a gradient border/background if requested) and rendered on the E Ink display
+- Source modules
+  - **Shairport Sync source**: subscribes to an MQTT topic for changes in album art metadata
+  - **MPD source**: uses the native MPD client to listen for changes in the current track filename,
+    fetches album art from an HTTP endpoint (such as one provided by Moode Audio)
+  - **Screen Saver source**: rotates through images in a directory. 
+
+These all run as separate processes and systemd services.
+
+
+### Stuff taken care of by the setup script
+
+- Mosquitto MQTT broker is installed 
+- Shairport is configured to publish metadata updates to an MQTT topic
+- Some required RaspPi firmware config changes are made, if necessary, to support the Inky display
+- The BlackDog components are installed as systemd services, and started
+
+
+## Contact
+
+Please get in touch if you're using this!
+
